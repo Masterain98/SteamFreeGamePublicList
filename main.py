@@ -1,24 +1,23 @@
 # -*-coding:UTF-8-*-
-from urllib import request  # 导入request模块
 import requests  # 导入requests模块
 import json  # 导入JSON模块
 import chardet  # 导入chardet编码识别模块
 from bs4 import BeautifulSoup  # 导入BeautifulSoup
 import MySQLdb  # 导入Mysql相关模块
 import re
+import cfscrape
+
 
 if __name__ == "__main__":
     # 定义header
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36"}
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36"
+        }
     # 发起request
-    req = request.Request("https://steamdb.info/upcoming/free/#upcoming-promotions", headers=headers)
-
-    response = request.urlopen(req)  # 打开网站
-    html = response.read()  # 读取内容
-
-    charset = chardet.detect(html)  # 获取编码格式
-    html = html.decode(charset["encoding"])  # 解码
+    scraper = cfscrape.create_scraper()
+    req = scraper.get("https://steamdb.info/upcoming/free/", headers=headers).content
+    charset = chardet.detect(req)  # 获取编码格式
+    html = req.decode(charset["encoding"])  # 解码
     # print(html)
 
     freeGameList = []  # 初始化免费游戏sub列表
@@ -70,7 +69,8 @@ if __name__ == "__main__":
         print(ASFCommand)
     else:
         print("No Free Game Available!")
-
+    
+    print(freeGameList)
     # 连接数据库
     db = MySQLdb.connect(host="127.0.0.1",
                          user="root",
